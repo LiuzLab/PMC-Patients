@@ -10,7 +10,7 @@ for query in retrieved:
     retrieved[query] = sorted(retrieved[query].items(), key = lambda x: x[1], reverse = True)
 
 train_data = {}
-with open("../../../../../datasets/patient2patient_retrieval/PPR_train_qrels.tsv", "r") as f:
+with open("../../../../../datasets/PPR/qrels_train.tsv", "r") as f:
     lines = f.readlines()
 for line in lines[1:]:
     q, doc, _ = line.split('\t')
@@ -19,7 +19,7 @@ for line in lines[1:]:
     else:
         train_data[q] = [doc]
 qrels = {}
-with open("../../../../../datasets/patient2patient_retrieval/PPR_test_qrels.tsv", "r") as f:
+with open("../../../../../datasets/PPR/qrels_test.tsv", "r") as f:
     lines = f.readlines()
 for line in lines[1:]:
     q, doc, _ = line.split('\t')
