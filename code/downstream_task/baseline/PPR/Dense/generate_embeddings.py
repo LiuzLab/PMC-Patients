@@ -2,6 +2,7 @@ import json
 import numpy as np
 import torch
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
 import faiss
 from tqdm import trange
 from transformers import AutoTokenizer
@@ -123,7 +124,7 @@ def dense_retrieve(queries, query_ids, documents, doc_ids, nlist = 1024, m = 24,
         result_scores = results[0][i]
         retrieved[query_ids[i]] = {result_ids[j]: float(result_scores[j]) for j in range(k)}
 
-    #json.dump(retrieved, open("../PPR_link_test.json", "w"), indent = 4)
+    json.dump(retrieved, open("../PPR_link_test.json", "w"), indent = 4)
     evaluation = EvaluateRetrieval()
     metrics = evaluation.evaluate(qrels, retrieved, [10, 1000])
     mrr = evaluation.evaluate_custom(qrels, retrieved, [index.ntotal], metric="mrr")
@@ -146,7 +147,7 @@ def run_unsupervised(model_name_or_path, output_dir = None):
     # torch.cuda.set_device(local_rank)
     # device = torch.device("cuda", local_rank)
     # print(local_rank, device)
-    device = "cuda"
+    device = "mps"
 
     model = BiEncoder(model_name_or_path)
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
@@ -165,9 +166,9 @@ def run_unsupervised(model_name_or_path, output_dir = None):
 if __name__ == "__main__":
     #model_name_or_path = "michiyasunaga/BioLinkBERT-base"
     #model_name_or_path = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext"
-    #model_name_or_path = "emilyalsentzer/Bio_ClinicalBERT"
+    model_name_or_path = "emilyalsentzer/Bio_ClinicalBERT"
     #model_name_or_path = "allenai/specter"
-    model_name_or_path = "./MedCPT-d"
+    #model_name_or_path = "./MedCPT-d"
 
     #output_dir = "output_linkbert"
     output_dir = None
