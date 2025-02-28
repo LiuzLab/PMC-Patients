@@ -12,3 +12,4 @@ torch==2.0.0
 tqdm==4.65.0
 transformers==4.27.3
 word2number==1.1
+huggingface_hub==0.25.0
