@@ -13,7 +13,13 @@ from beir.datasets.data_loader import GenericDataLoader
 
 data_dir = "../../../../../datasets/PPR"
 
-es = ES()
+es_host = os.getenv("ELASTIC_HOST", "http://localhost:9200")
+es_api_key = os.getenv("ELASTIC_API_KEY")
+
+es = ES(
+    hosts=[es_host],
+    api_key=es_api_key
+)
 
 class search_thread(Thread):
     def __init__(self, patient_id, patient):
@@ -32,7 +38,7 @@ class search_thread(Thread):
         thread_max.release()
 
 
-thread_max = BoundedSemaphore(40)
+thread_max = BoundedSemaphore(4)
 q = Queue()
 threads = []
 result_ids_with_score = {}
