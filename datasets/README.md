@@ -1,32 +1,3 @@
-## Tasks
-
-The following tasks have been completed:
-
-- [x] Fix `requirements.txt`
-- [x] Add environment variables for Elasticsearch
-- [x] Run BM25
-- [x] Run Neural Network (NN)
-- [x] Run Dense - `generate_embeddings.py`
-
-The following tasks are pending:
-
-- [ ] Run Dense - other scripts
-- [ ] Run Reciprocal Rank Fusion (RRF)
-
-## Notes on March 1st, 2025
-
-To run `BM25`, you need to use [Elasticsearch](https://elasticsearch-py.readthedocs.io/). You can install the local version using the following command (Docker is required):
-
-```sh
-curl -fsSL https://elastic.co/start-local | sh
-```
-
-After that, you need to add two environment variables to your shell rc (e.g., `~/.bashrc` and `~/.zshrc`) file. These variables are shown after successfully running the command above.
-
-```sh
-export ELASTIC_HOST="http://localhost:9200"
-export ELASTIC_API_KEY="your_api_key"
-```
 
 # Dataset
 
