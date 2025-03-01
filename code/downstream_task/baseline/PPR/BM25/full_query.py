@@ -17,8 +17,9 @@ es_host = os.getenv("ELASTIC_HOST", "http://localhost:9200")
 es_api_key = os.getenv("ELASTIC_API_KEY")
 
 es = ES(
-    hosts=[es_host],
-    api_key=es_api_key
+    hosts=es_host,
+    api_key=es_api_key,
+    timeout=1000
 )
 
 class search_thread(Thread):
@@ -43,7 +44,7 @@ q = Queue()
 threads = []
 result_ids_with_score = {}
 corpus_path = "../../../../../datasets/PPR/corpus.jsonl"
-query_path = "../../../../../datasets/PPR/queries/test_queries.jsonl"
+query_path = "../../../../../datasets/queries/test_queries.jsonl"
 qrels_path = "../../../../../datasets/PPR/qrels_test.tsv"
 corpus, queries, qrels = GenericDataLoader(
     corpus_file=corpus_path, 

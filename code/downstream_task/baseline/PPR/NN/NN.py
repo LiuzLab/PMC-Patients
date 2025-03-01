@@ -4,8 +4,8 @@ import numpy as np
 from beir.retrieval.evaluation import EvaluateRetrieval
 
 
-retrieved = json.load(open("../PPR_Dense_test.json", "r"))
-#retrieved = json.load(open("../PPR_BM25_test.json", "r"))
+#retrieved = json.load(open("../PPR_Dense_test.json", "r"))
+retrieved = json.load(open("../PPR_BM25_test_full.json", "r"))
 for query in retrieved:
     retrieved[query] = sorted(retrieved[query].items(), key = lambda x: x[1], reverse = True)
 
