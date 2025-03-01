@@ -3,7 +3,7 @@ from tqdm import tqdm
 from beir.retrieval.evaluation import EvaluateRetrieval
 
 
-BM25 = json.load(open("../PPR_BM25_test.json", "r"))
+BM25 = json.load(open("../PPR_BM25_test_full.json", "r"))
 BM25 = {query: {k: i+1 for i, (k,v) in enumerate(sorted(BM25[query].items(), key=lambda x: x[1], reverse=True))} for query in BM25}
 dense = json.load(open("../PPR_pubmed_test.json", "r"))
 dense = {query: {k: i+1 for i, (k,v) in enumerate(sorted(dense[query].items(), key=lambda x: x[1], reverse=True))} for query in dense}
