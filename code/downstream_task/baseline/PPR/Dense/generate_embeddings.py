@@ -10,8 +10,10 @@ from beir.retrieval.evaluation import EvaluateRetrieval
 import argparse
 
 
-def generate_embeddings(tokenizer, model, patients, device, output_dir=None, model_max_length=512, batch_size=128, train_data_path=None):
+def generate_embeddings(tokenizer, model, patients, device, output_dir=None, model_max_length=512, batch_size=1024, train_data_path=None):
+    print(f"batch_size: {batch_size}")
     # Load test patient UIDs from qrels_test.tsv
+    train_patient_uids = json.load(open("../../../../../datasets/meta_data/train_patient_uids.json", "r"))
     with open("../../../../../datasets/PPR/qrels_test.tsv", "r") as f:
         lines = f.readlines()
     test_set = set([line.split('\t')[0] for line in lines[1:]])
@@ -39,8 +41,9 @@ def generate_embeddings(tokenizer, model, patients, device, output_dir=None, mod
                     
                     # Parse the JSON object
                     json_obj = json.loads(line)
-                    json_id = json_obj.get("id", f"line_{line_number}")
-                    
+                    #json_id = json_obj.get("id", f"line_{line_number}")
+                    custom_id = json_obj.get("custom_id", f"line_{line_number}")
+                    json_id = custom_id.replace("request-", "") if isinstance(custom_id, str) and custom_id.startswith("request-") else custom_id
                     # Extract the response body if it exists
                     if "response" in json_obj and "body" in json_obj["response"]:
                         body = json_obj["response"]["body"]
@@ -61,7 +64,7 @@ def generate_embeddings(tokenizer, model, patients, device, output_dir=None, mod
                                             if "chunk_text" in chunk_data:
                                                 # Create a unique ID for this chunk
                                                 chunk_id = f"{json_id}_{chunk_idx}"
-                                                train_patient_uids.append(chunk_id)
+                                                train_patient_uids.append(json_id)
                                                 train_patients.append(chunk_data["chunk_text"])
                                 except json.JSONDecodeError:
                                     print(f"Warning: Could not parse JSON from message content in line {line_number}")
@@ -191,7 +194,7 @@ def run_metrics(output_dir):
     return
 
 
-def run_unsupervised(model_name_or_path, output_dir=None, train_data_path=None):    
+def run_unsupervised(model_name_or_path, output_dir=None, train_data_path=None, have_embeddings=False):    
     # torch.distributed.init_process_group(backend = "nccl", init_method = 'env://')
     # local_rank = int(os.environ["LOCAL_RANK"])
     # torch.cuda.set_device(local_rank)
@@ -207,9 +210,17 @@ def run_unsupervised(model_name_or_path, output_dir=None, train_data_path=None):
 
     patients = json.load(open("../../../../../datasets/PMC-Patients.json", "r"))
     patients = {patient['patient_uid']: patient for patient in patients}
-    test_embeddings, test_patient_uids, train_embeddings, train_patient_uids = generate_embeddings(
-        tokenizer, model, patients, device, output_dir, train_data_path=train_data_path
-    )
+
+    # If embeddings are not present, generate them
+    if not have_embeddings:
+        test_embeddings, test_patient_uids, train_embeddings, train_patient_uids = generate_embeddings(
+            tokenizer, model, patients, device, output_dir, batch_size=1024, train_data_path=train_data_path
+        )
+    else:
+        test_embeddings = np.load("{}/test_embeddings.npy".format(output_dir))
+        train_embeddings = np.load("{}/train_embeddings.npy".format(output_dir))
+        test_patient_uids = json.load(open("{}/test_patient_uids.json".format(output_dir), "r"))
+        train_patient_uids = json.load(open("{}/train_patient_uids.json".format(output_dir), "r"))
     results = dense_retrieve(test_embeddings, test_patient_uids, train_embeddings, train_patient_uids)
     print(results)
     return
@@ -223,6 +234,8 @@ if __name__ == "__main__":
                         help="Directory to save embeddings")
     parser.add_argument("--train_data", type=str, default=None,
                         help="Path to JSONL file containing train data")
+    parser.add_argument("--have_embeddings", type=bool, default=False,
+                        help="Whether to skip generating embeddings")
     
     args = parser.parse_args()
     
@@ -235,4 +248,4 @@ if __name__ == "__main__":
     #output_dir = "output_linkbert"
     output_dir = args.output_dir
     #run_metrics(output_dir)
-    run_unsupervised(model_name_or_path, output_dir, args.train_data)
+    run_unsupervised(model_name_or_path, output_dir, args.train_data, args.have_embeddings)
